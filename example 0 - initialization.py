@@ -1,27 +1,28 @@
 from Algebraica import cp
+# first, to get started, we need a way to create complex numbers.
 # cp() is a function, that allows to create
-# objects of class Algebraica.Complex
+# objects of class Algebraica.Complex.
 
 
 A = cp(1)
 print('A =', A)
 print()
-# the above function makes A equal 1 + 0 i
+# the above function makes A equal 1 + 0 i.
 # if you want to initialize a Complex with
 # only the real part, simply use cp(R), and
-# it will create a comlex number R + 0 i
+# it will create a comlex number R + 0 i.
 
 B = cp(2, 3)
 print('B =', B)
 print()
 # if you need a complex number that actually has
 # an imaginary component, call cp(R, I) and
-# you will get R + I i
+# you will get R + I i as a result.
 
 C = cp(4.5, 7)
 print('C =', C)
 print()
-# you can create complex numbers using floats
+# you can create complex numbers using floats.
 
 D = cp(
     (1, 2),
@@ -29,19 +30,19 @@ D = cp(
 )
 print('D =', D)
 print()
-# or, instead of floats, you might want to use integer fractions
-# the avobe funcion creates a number 1/2 + 2/3 i
+# or, instead of floats, you might want to use integer fractions.
+# the  expression avobe creates a number 1/2 + 2/3 i.
 
 E = cp('pi')
 print('E =', E)
 print()
-# you can create irrational numbers just like that
-# note, that there is no restrictions on the names
+# you can create irrational numbers just like that.
+# note, that there is no restrictions on the names.
 
 F = cp('Muad`dib')
 print('F =', F)
 print()
-# you can choose arbitrary names
+# you can choose arbitrary names.
 
 G = cp(
     ((3, 2), 'pi'),
@@ -49,10 +50,10 @@ G = cp(
 )
 print('G =', G)
 print()
-# the irrational might also contain a fraction
+# the irrational might also contain a fraction.
 # in order to do such thing, write the expression in a form
 # cp( (N, D), name )  where N, D are the numerator and denominator
-# and name is the name of your constant
+# and name is the name of the constant.
 
 H = cp(
     ((4, 9), ('ln', cp(7))),
@@ -60,10 +61,10 @@ H = cp(
 )
 print('H =', H)
 print()
-# besides constants, you might want to add functions, such as ln
-# for that, write the expression in a form cp( (N, D), (name, *args) )
-# there can be multiple arguments, so don`t hesitate to add them if needed
-# note that args must be objects of class Complex
+# besides constants, you might want to add functions, such as ln.
+# in order to do that, write the expression in a form cp( (N, D), (name, *args) ).
+# there can be multiple arguments, so don`t hesitate to add them if needed.
+# note that args must all be objects of class Complex.
 
 I = cp(
     ((4, 5), ('log', cp('e'), cp(2))),
@@ -79,8 +80,8 @@ J = cp(
 )
 print('J =', J)
 print()
-# if you love square brackets, you can write your expressions like
-# cp( (N, D), [ (name, *args) ] )
+# if you like square brackets, you can write your expressionsof type
+# cp( (N, D), [ (name, *args) ] ).
 # but really, why bother with square brackets?
 
 K = cp(
@@ -93,9 +94,9 @@ K = cp(
 )
 print('K =', K)
 print()
-# well, with them you can have multiple irrational numbers multiplied togethet
+# well, with them you can have multiple irrational numbers multiplied together.
 # for example, the above expression gives out a number
-# 1/1 * pi * sqrt(2 i) * sin(1/2 * pi) + 2/9 i
+# 1/1 * pi * sqrt(2 i) * sin(1/2 * pi) + 2/9 i.
 
 L = cp(
     ['pi', ((1, 2), [('ln', cp(11)), ('sqrt', cp(2))]), ('sqrt', cp(5))],
@@ -103,11 +104,11 @@ L = cp(
 )
 print('L =', L)
 print()
-# if you really like lists, you can create numbers with multiple terms, like this one
-# to do it, use cp( [*real_terms], [*comp_terms] ), where real_terms and complex_terms
-# are things that will be added together eventually
-# each of there terms is to be declared just as terms used to be declared before, aka
-# in a form cp( (N, D), [ (name1, *args1), (name2, *args2) ], ... ) or in any of the shorter ways
+# if you really like lists, you can create numbers with multiple terms, like this one.
+# you can use cp( [*real_terms], [*comp_terms] ), where real_terms and complex_terms
+# are things that will be added together eventually.
+# each of there terms is to be declared just as terms used to be declared before, e.g.
+# in a form cp( (N, D), [ (name1, *args1), (name2, *args2) ], ... ) or in any of the shorter ways.
 
 M = cp(
     [(2, 3), ((7, 5), 'pi'), ((4, 3), ('exp', cp(3))),
@@ -133,7 +134,8 @@ N = cp(
 )
 print('N =', N)
 print()
-# if you want, you can use M to define N
-# this way Complex can be 'embeded' into one another
+# if you want, you can use M to define N.
+# this way Complex can be 'embeded' into one another.
 
+# in order to see how to perform operations on complex numbers, look up example 1
 input()
