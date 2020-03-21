@@ -1,76 +1,80 @@
 from Algebraica import cp
+# if creating complex numbers was all Algebraica was usable for, it would be pretty useless
+# luckily, Algebraica allows to perform a variety of operations with complex numbers
 
 
 A = cp(2, 3)
 B = cp(13, 7)
+# first, here are two class Complex objects
 
 print('A =', A)
-print('A =', B)
+print('B =', B)
 print()
-# just printing the initial numbers
+# here are the values of A and B
 
 print('-A =', -A)
 print()
-# multiplying number by -1
+# this operator turns a + bi to (-a) + (-b) i
 
 print('~A =', ~A)
 print()
-# producing a complex conjugate
+# this one returns a complex conjugate of A.
+# if A = a + b i, ~A = a + (-b) i
 
 print('A + B =', A + B)
 print()
-# adding two numbers together
+# that`s how two class Complex objects are added together
 
 print('A - B =', A - B)
 print()
-# subtracting two numbers from each other
+# that`s how two class Complex objects can be subtracted from each other
 
 print('A * B =', A * B)
 print()
-# multiplying two numbers
+# that`s multiplication of two complex number
 
 print('A * 2 =', A * 2)
+print('A / 2 =', A / 2)
 print()
-# multiplying complex by int
+# complex numbers can be multiplied and divided by integers
 
 print('A * 1.6 =', A * 1.6)
+print('A / 1.6 =', A / 1.6)
 print()
-# multiplying complex by float
+# and floats
 
 print('A * pi =', A * 'pi')
 print()
 # you can even multiply Complex by string!
+# the result of this operation is A * cp('pi').
 
 print('A * stuff =', A * (['pi', [((1, 2), ('ln', cp(11))), ('sqrt', cp(2))], ('sqrt', cp(5))], [(1, 2), 'e']))
 print()
 # actually, you can write down any expression,
-# just as if you were creating a class Complex object
+# just as if you were creating a class Complex object.
+# in other words, A * (something) = A * cp(something)
 
 print('A / B =', A / B)
 print()
-# dividing two numbers
+# class Complex objects can be divided by other class Complex objects
 
 print('A ** +3 =', A ** 3)
+print('A ** 0 =', A ** 0)
 print('A ** -3 =', A ** -3)
 print()
-# raising to integer power
+# they can be raised to integer powers
 
 print('A ** B =', A ** B)
 print()
-# raising complex to complex power
-
-print('Rl(A) =', A.real())
-print('Im(A) =', A.imag())
-print()
-# separating real and imaginary parts
+# they can also be raised to a complex power
 
 print('|A| =', abs(A))
 print()
-# finding the absolute value
+# this is the absolute value function
 
 print('arg(A) =', A.arg())
 print()
-# finding the complex argument
+# this is how you find the complex argument
 
 print('(A == B) =', A == B)
 print()
@@ -79,13 +83,6 @@ print()
 print('(A != B) =', A != B)
 print()
 # checking if the two numbers are different
-
-print('(A.rl == B.rl) =', A.rl == B.rl)
-print('(A.rl != B.rl) =', A.rl != B.rl)
-print('(A.im == B.im) =', A.im == B.im)
-print('(A.im != B.im) =', A.im != B.im)
-print()
-# comparing real/imaginary parts
 
 C = A + B ** 7
 D = (A / B) ** C
