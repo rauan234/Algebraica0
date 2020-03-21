@@ -89,7 +89,16 @@ print('(A <= B) =', A <= B)
 print('(A > B) =', A > B)
 print('(A < B) =', A < B)
 print()
-# class Rational objects can be compared
+# class Rational objects can be compared with each other
+
+print('(A == 1) =', A == 1)
+print('(A != 2.5) =', A != 2.5)
+print('(A >= 3.2) =', A >= 3.2)
+print('(A <= 4.9) =', A <= 4.9)
+print('(A > 7) =', A > 7)
+print('(A < 9.0) =', A < 9.0)
+print()
+# class Rational objects can be compared with integers and floats
 
 print('-C =', -C)
 print('-D =', -D)
@@ -107,7 +116,7 @@ print('2/4 =', Rational(2, 4))
 
 print('1/(-2) =', Rational(1, -2))
 print()
-# also the minus sign is automatically transfered from
+# also, the minus sign is automatically transfered from
 # the numerator to the denominator
 
 del A
@@ -297,15 +306,6 @@ print()
 # turned into class Function objects
 # though dividing by string is imposible
 
-print('A + pi/2 =', A + ( (1, 2), 'pi' ))
-print()
-# actually, you can even do operations between Irrational and tuple objects
-# this is possible, because if the second argument of + (and other) operators
-# is not a class Irrational object, it is turned into Irrational by calling
-# the make_irrational( inp ) function, that tries to turn what you give it
-# into a class Irrational object
-# this function will be studied in detail in the next eample
-
 del A
 del B
 
@@ -352,22 +352,22 @@ B = Complex(
         Term(
             Rational( 9, 10 ),
             [
-                Function( ('e', cp(11)) ),
-                Function( ('f', cp(12)) )
+                Function( ('f', cp(11)) ),
+                Function( ('g', cp(12)) )
             ]
             ),
         Term(
             Rational( 13, 14 ),
             [
-                Function( ('g', cp(15)) ),
-                Function( ('h', cp(16)) )
+                Function( ('h', cp(15)) ),
+                Function( ('j', cp(16)) )
             ]
             ),
         Term(
             Rational( 17, 18 ),
             [
-                Function( ('j', cp(19)) ),
-                Function( ('k', cp(20)) )
+                Function( ('k', cp(19)) ),
+                Function( ('l', cp(20)) )
             ]
             )
         )
@@ -385,14 +385,28 @@ print()
 
 D = Rational(1, 2)
 print('D =', cp(D))
+print()
+
 E = Function(('sqrt', cp(3)))
 print('E =', cp(E))
+print()
+
 F = Term(D, [E])
 print('F =', cp(F))
+print()
+
 G = Irrational(F)
 print('G =', cp(G))
+print()
 # you can also create Complex by calling the cp(inp) function
 # with argument being an object of one of the subsidiary classes
+
+H = cp((8, 3), ((1, 1), ('sqrt', cp(2))))
+J = Rational(4, 7)
+print('H * J =', H * J)
+print('H / J =', H / J)
+print()
+# you can perform multiplication and division with Complex and Rational
 
 # so that`s how it is
 # this example demonstrates the structre of Complex
