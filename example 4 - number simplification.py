@@ -52,6 +52,41 @@ print('tan  30 =', cp( ((1, 1), ('tan', cp( ((1, 6), 'pi') ))) ).simplified())
 print()
 # and tangents
 
+print('arcsin 0 =', cp( ((1, 1), ('arcsin', cp( ((0, 1)) ))) ).simplified())
+print('arcsin 1/2 =', cp( ((1, 1), ('arcsin', cp( ((1, 2)) ))) ).simplified())
+print('arcsin 1/sqrt(2) =', cp( ((1, 1), ('arcsin', cp( ((1, 2), ('sqrt', cp(2))) ))) ).simplified())
+print('arcsin sqrt(3)/2 =', cp( ((1, 1), ('arcsin', cp( ((1, 2), ('sqrt', cp(3))) ))) ).simplified())
+print('arcsin 1 =', cp( ((1, 1), ('arcsin', cp( ((1, 1)) ))) ).simplified())
+print()
+# here are some arcsin values
+
+print('arccos 0 =', cp( ((1, 1), ('arccos', cp( ((0, 1)) ))) ).simplified())
+print('arccos 1/2 =', cp( ((1, 1), ('arccos', cp( ((1, 2)) ))) ).simplified())
+print('arccos 1/sqrt(2) =', cp( ((1, 1), ('arccos', cp( ((1, 2), ('sqrt', cp(2))) ))) ).simplified())
+print('arccos sqrt(3)/2 =', cp( ((1, 1), ('arccos', cp( ((1, 2), ('sqrt', cp(3))) ))) ).simplified())
+print('arccos 1 =', cp( ((1, 1), ('arccos', cp( ((1, 1)) ))) ).simplified())
+print()
+# here are arccosines
+
+print('arctan 0 =', cp( ((1, 1), ('arctan', cp( ((0, 1)) ))) ).simplified())
+print('arctan 1/sqrt(3) =', cp( ((1, 1), ('arctan', cp( ((1, 3), ('sqrt', cp(3))) ))) ).simplified())
+print('arctan 1 =', cp( ((1, 1), ('arctan', cp( ((1, 1)) ))) ).simplified())
+print('arctan sqrt(3) =', cp( ((1, 1), ('arctan', cp( ((1, 1), ('sqrt', cp(3))) ))) ).simplified())
+print()
+# and arctangents
+
+print('sinh 0 =', cp( ((1, 1), ('sinh', cp(0)))).simplified())
+print('cosh 0 =', cp( ((1, 1), ('cosh', cp(0)))).simplified())
+print('tanh 0 =', cp( ((1, 1), ('tanh', cp(0)))).simplified())
+print()
+# some hyperbolic trig function values
+
+print('sinh -f =', cp( ((1, 1), ('sinh', -cp('f'))) ).simplified())
+print('cosh -f =', cp( ((1, 1), ('cosh', -cp('f'))) ).simplified())
+print('tanh -f =', cp( ((1, 1), ('tanh', -cp('f'))) ).simplified())
+print()
+# hyperbolic trig functions of negative argument
+
 print(cp( ((1, 1), ('sin', cp( ((-1, 7), 'pi') ))) ), '= ', end='')
 print(cp( ((1, 1), ('sin', cp( ((-1, 7), 'pi') ))) ).simplified())
 print()
@@ -73,14 +108,15 @@ print(E.simplified())
 print()
 # arguments of functions are also automatically simplified
 
-Algebraica.MultiplyPowers = True
-F = (cp(0, 1) * D) ** cp((7, 3))
+print('(pi ** 1/2) ** 2 =', cp( ((1, 1), ('pow', cp( ((1, 1), ('pow', cp('pi'), cp((1, 2)))) ), cp(2)) )).simplified())
+print('(a ** 1/2) ** 2 =',cp( ((1, 1), ('pow', cp( ((1, 1), ('pow', cp('a'), cp((1, 2)))) ), cp(2)) )).simplified())
+print()
+# pow( pow(a, b), c ) is simplified to pow(a, b * c) if a is always positive
+
+F = cp( ((1, 1), ('pow', D, E**2)) )
 print('F =', F)
 print(F.simplified())
 print()
-# if you want, you can turn on MultiplyPowers
-# it allows to simplify things even further
-# for example, (x ** 2) ** 1/2 becomes x
 
 G = cp( ((1, 1), ('pow', cp( ((1, 1), ('pow', cp('f'), cp((2)))) ), cp((1, 2)))) )
 print('G =', G)
@@ -132,7 +168,7 @@ print(N.simplified())
 print()
 # power functions with integer exponents are calculated
 
-O = cp( ((1, 1), ('pow', cp('e'), cp((3, 2)))) )
+O = cp( ((1, 1), ('pow', cp(36) * cp('e') * cp('pi'), cp((3, 2)))) )
 print('O =', O)
 print(O.simplified())
 print()
@@ -169,15 +205,33 @@ print('Rl( ln(2) + 9 + 4 i ) =', cp( ((1, 1), ('Im', cp([ ('ln', cp(2)), 9 ], 4)
 print()
 # if Rl or Im functions take sum as an argument, they are simplified in the above way
 
+print('Rl(b i) =', cp( ((1, 1), ('Rl', cp(0, 'b')))).simplified())
+print('Im(b i) =', cp( ((1, 1), ('Im', cp(0, 'b')))).simplified())
+# Rl and Im are also simplified like that
+
 print('exp(0) =', cp( ((1, 1), ('exp', cp(0))) ).simplified())
 print('exp(1) =', cp( ((1, 1), ('exp', cp(1))) ).simplified())
 print()
 # exp functions are calculated if the argument is either 0 or 1
 
+print('ln(24) =', cp( ((1, 1), ('ln', cp(24))) ).simplified())
+# numbers inside logarithms are decomposed into primes
+
 print('ln(2/3 pi) =', cp( ((1, 1), ('ln', cp((2, 3)) * cp('pi'))) ).simplified())
 print('ln(pow(pi, 3)) =', cp( ((1, 1), ('ln', cp( ((1, 1), ('pow', cp('pi'), cp(3))) ))) ).simplified())
 print()
 # logarithms are simplified in the following way
+
+print('arg(2) =', cp( ((1, 1), ('arg', cp(2))) ).simplified())
+print('arg(3 i) =', cp( ((1, 1), ('arg', cp(0, 3))) ).simplified())
+print('arg(2 + 3  i) =', cp( ((1, 1), ('arg', cp(2, 3))) ).simplified())
+print()
+# args of rational numbers are calulated
+
+print('arcsin(-2/3 f) =', cp( ((1, 1), ('arcsin', cp(((-2, 3), 'f')))) ).simplified())
+print('arccos(-2/3 f) =', cp( ((1, 1), ('arccos', cp(((-2, 3), 'f')))) ).simplified())
+print('arctan(-2/3 f) =', cp( ((1, 1), ('arctan', cp(((-2, 3), 'f')))) ).simplified())
+# that`s how arc-trig functions of negative arguments are simplified
 
 P = cp(
     [(2, 3), ((7, 5), 'pi'), ((4, 3), ('exp', cp(3))),
@@ -214,6 +268,20 @@ print()
 # and returns its` simplified version
 # .simplify(), on the other hand, simplifies the initial number
 # and does not return anything
+
+'''
+S = cp(6, -2)
+T = cp(19, 3)
+U = S ** 3 + T ** 4 + T * S
+V = (S / T**2) ** U
+U += V
+W = cp(('exp', U))
+print('W =', W)
+print(W.simplified())
+print()
+# this is how complicated it might get
+# be patient with this one as it takes quite a while to print
+'''
 
 # as you might have noticed, the .simplify() function is very primitive
 # and clearly needs modernization
