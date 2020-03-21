@@ -627,7 +627,7 @@ class Function:
                 elif(len(N.rl.terms[0].irt) == 1):
                     if(term.irt[0].name == pow_function_name):
                         if(term.rat == 1):
-                            # ln(pi ** 3) = 3 * ln(pi)
+                            # ln(pi ** 3) = 3 * ln(pi)                        
                             return cp( ((1, 1), (ln_function_name, term.irt[0].args[0])) ) * term.irt[0].args[1]
                         
                         else:
@@ -885,7 +885,7 @@ class Function:
         return cp(self)
     
     def sign(self):
-        always_positive = [pi_constant_name, e_constant_name]
+        always_positive = [pi_constant_name, e_constant_name, abs_function_name]
         
         if(self.name in always_positive):
             return 1
@@ -898,7 +898,9 @@ class Function:
         if(self.name == e_constant_name):
             return True
         if((self.name == rl_function_name) or
-           (self.name == im_function_name)):
+           (self.name == im_function_name) or
+           (self.name == arg_function_name) or
+           (self.name == abs_function_name)):
             return True
         
         if(self.name == pow_function_name):
@@ -1302,15 +1304,15 @@ class Irrational:
     def reduce(self):
         if(len(self.terms) > 1):
             newterms = []
-            
+                     
             while(len(self.terms) > 1):
-                term = self.terms.pop()
+                term = self.terms.pop(0)
                 if not term.might_be_nonzero():
                     continue
 
                 new_rat = term.rat
-                while(len(self.terms) and term.eq_irt(self.terms[0])):
-                    new_rat += self.terms.pop().rat
+                while((len(self.terms) > 0) and term.eq_irt(self.terms[0])):
+                    new_rat += self.terms.pop(0).rat
                 
                 new_rat.reduce()
                 newterms.append(Term(new_rat, term.irt))
