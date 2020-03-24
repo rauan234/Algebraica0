@@ -14,6 +14,15 @@ global AutoSimplify
 AutoSimplify = False
 # if true, all class Complex are simplified before each print
 
+global ExpandComplexExponentials
+ExpandComplexExponentials = True
+# if true, expressions of type exp(f i), where f is a real number, will
+# be re-written as cos(f) + i sin(f)
+
+global ReplaceTrig
+ReplaceTrig = False
+# if true, cos and ctg are changed to sin and tan
+
 global e_constant_name
 global pi_constant_name
 global tau_constant_name
@@ -124,7 +133,11 @@ class Rational:
             return '0'
         
         else:
-            return str(self.num) + '/' + str(self.den)  
+            return str(self.num) + '/' + str(self.den)
+        
+    def __abs__(self):
+        # abs( N / D ) = abs(N) / abs(D)
+        return cp( (abs(self.num), abs(self.den)) )
     
     def __add__(first, second):
         if(isinstance(second, Rational)):
@@ -166,7 +179,14 @@ class Rational:
         else:
             raise TypeError('Wrong argument type: ' + str(type(second)))
     def __imul__(first, second):
-        return first * second    
+        return first * second
+    
+    def __mod__(first, second):
+        if isinstance(second, int):
+            return Rational(first.num % (first.den * second), first.den)
+        
+        else:
+            raise TypeError('Wrong argument type: expected int, got ' + str(type(second)))
         
     def __sub__(first, second):
         if(isinstance(second, Rational)):
@@ -221,7 +241,7 @@ class Rational:
         else:
             raise TypeError('Wrong argument type: ' + str(type(second)))
     def __ne__(first, second):
-        return not first == second
+        return not (first == second)
     
     def __gt__(first, second):
         if isinstance(second, Rational):
@@ -424,28 +444,45 @@ class Function:
         out = ''
         tab = ' ' * elevation * TabulationStep
         
-        out += str(self.name)
-        
-        if(len(self.args) == 0):
-            return self.name
-        
-        elif((len(self.args) == 1) and self.args[0].is_constant()):
-            out += '[ '
-            out += self.args[0].show(0, one_line=True)
-            out += ' ]'
+        if((self.name == pow_function_name) and (self.args[1] == cp((1, 2)))):
+            out += sqrt_function_name
             
-        else:
-            out += '[\n'
-            
-            for i in range(len(self.args)):
-                out += self.args[i].show(elevation + 2)
+            if(self.args[0].is_constant()):
+                out += '[ '
+                out += self.args[0].show(0, one_line=True)
+                out += ' ]'
                 
-                if(i != len(self.args) - 1):
-                    out += ', \n'
+            else:
+                out += '[\n'
+                
+                out += self.args[0].show(elevation + 2)
                 out += '\n'
                 
-            out += tab + '    ]'
-
+                out += tab + '    ]'            
+        
+        else:
+            out += str(self.name)
+            
+            if(len(self.args) == 0):
+                return self.name
+            
+            elif((len(self.args) == 1) and self.args[0].is_constant()):
+                out += '[ '
+                out += self.args[0].show(0, one_line=True)
+                out += ' ]'
+                
+            else:
+                out += '[\n'
+                
+                for i in range(len(self.args)):
+                    out += self.args[i].show(elevation + 2)
+                    
+                    if(i != len(self.args) - 1):
+                        out += ', \n'
+                    out += '\n'
+                    
+                out += tab + '    ]'
+    
         return out
     
     def __str__(self):
@@ -459,6 +496,8 @@ class Function:
             N = self.args[0]
             P = self.args[1]
             
+            if N.is_zero():
+                return cp(0)
             if((N == cp(1)) or (P == cp(0))):
                 return cp(1)
             if(P == cp(1)):
@@ -466,7 +505,7 @@ class Function:
             
             if(N.im.might_be_nonzero() and N.rl.is_zero()):
                 # pow( a * i, b) = pow(a, b) * pow(i, b)
-                return cp(0, ((1, 1), (pow_function_name, N / cp(0, 1), P) )) * (cp(0, 1) ** P)
+                return cp( ((1, 1), (pow_function_name, cp(N.im), P)) ) * (cp(0, 1) ** P)
             
             if(N.is_real_int() and P.is_real_int()):
                 n = N.rl.terms[0].rat.num
@@ -475,7 +514,11 @@ class Function:
                 if(p > 0):
                     return cp(n ** p)
                 else:
-                    return cp( (1, n**(-p)) )            
+                    return cp( (1, n**(-p)) ) 
+            
+            if(N.rl.is_rational() and N.im.is_rational()):
+                if(P.is_real_int()):
+                    return N ** (P.rl.terms[0].rat.num)
                     
             if((len(N.rl.terms) == 1) and (len(N.im.terms) == 0)):
                 if((len(P.rl.terms) == 1) and (len(P.im.terms) == 0)):
@@ -542,6 +585,9 @@ class Function:
                 if(len(N.rl.terms[0].irt) == 1):
                     if(N.rl.terms[0].irt[0].name == e_constant_name):
                         return cp( ((1, 1), (exp_function_name, P * N.rl.terms[0].rat)) )
+                    
+                    if(N.rl.terms[0].irt[0].name == exp_function_name):
+                        return cp( ((1, 1), (exp_function_name, P * N.rl.terms[0].irt[0].args[0])) )
             
         elif(self.name == sqrt_function_name):
             # sqrt(x) is changed to pow(x, 1/2)
@@ -594,6 +640,14 @@ class Function:
                         else:
                             return cp( ((1, 1), (pow_function_name, P.rl.terms[0].irt[0].args[0],
                                                   cp(P.rl.terms[0].rat))) )    
+            
+            if(P.rl.is_zero() and P.im.might_be_nonzero()):
+                if(P.im.is_always_real()):
+                    if ExpandComplexExponentials:
+                        # exp(f i) = cos(f) + i sin(f)
+                        return cp( ((1, 1), (cos_function_name, cp(P.im))),
+                                   ((1, 1), (sin_function_name, cp(P.im)))
+                                   )
             
         elif(self.name == ln_function_name):
             N = self.args[0]
@@ -704,27 +758,54 @@ class Function:
             if(N.is_real_rational()):
                 return cp(N.rl.terms[0].rat.get_sign())
             
+            
             if(N.is_always_real()):
                 if((len(N.rl.terms) == 1) and (len(N.im.terms) == 0)):
-                    if(len(N.rl.terms[0].irt) == 1):
-                        s = N.rl.terms[0].irt[0].sign()
+                    out = cp(N.rl.terms[0].rat.get_sign())
+                    
+                    # sign( -3/2 * a * b * c ... ) =
+                    # = sign(-3/2) * sign(a) * sign(b) * sign(c) ...
+                    for fun in N.rl.terms[0].irt:
+                        s = fun.sign()
                         
-                        if(s != None):
-                            return cp(s)
-                        
-                    elif(len(N.rl.terms[0].irt) > 1):
-                        out = cp(N.rl.terms[0].rat.get_sign())
-                        
-                        # sign( -3/2 * a * b * c ... ) =
-                        # = sign(-3/2) * sign(a) * sign(b) * sign(c) ...
-                        for fun in N.rl.terms[0].irt:
-                            s = fun.sign()
-                            
-                            if(s == None):
-                                out *= cp( ((1, 1), (sign_function_name, cp(fun))) )
-                            else:
-                                out *= s
+                        if(s == None):
+                            out *= cp( ((1, 1), (sign_function_name, cp(fun))) )
+                        else:
+                            out *= s
 
+                    return out
+                
+        elif(self.name == abs_function_name):
+            N = self.args[0]
+            
+            if(N.rl.is_always_real() and N.im.is_always_real()):
+                # abs(a + b i) = sqrt( a**2 + b**2 )
+                return cp( ((1, 1), (pow_function_name,
+                                     cp( ((1, 1), (pow_function_name, cp(N.rl), cp(2))) )  + cp( ((1, 1), (pow_function_name, cp(N.im), cp(2))) ),
+                                     cp((1, 2)))) )
+            
+            if(N.rl.is_zero() and N.im.might_be_nonzero()):
+                # abs(N i) = abs(N)
+                return cp( ((1, 1), (abs_function_name, cp(N.im))) )
+            
+            if(N.rl.might_be_nonzero() and N.im.is_zero()):
+                if(len(N.rl.terms) == 1):
+                    term = N.rl.terms[0]
+                    
+                    if(len(term.irt) == 0):
+                        return abs(term.rat)
+                    
+                    if(term.rat < 0):
+                        # abs(-N) = abs(N)
+                        return cp( ((1, 1), (abs_function_name, -N)) )
+                    
+                    if( ((len(term.irt) > 0) and (term.rat != 1)) or (len(term.irt) > 1) ):
+                        out = abs(term.rat)
+                        
+                        for fun in term.irt:
+                            out *= cp( ((1, 1), (abs_function_name, cp(fun))) )
+                        
+                        # abs( a * b * c... ) = abs(a) * abs(b) * abs(c)...
                         return out
                     
         elif(self.name == arg_function_name):
@@ -734,11 +815,21 @@ class Function:
                 if(N.im.is_zero()):
                     return cp(0)
                 elif(N.rl.is_zero()):
-                    return cp(N.im.terms[0].rat.get_sign()) * half_pi
+                    return cp(N.im.terms[0].rat.get_sign()) * half_pi_constant
                 
                 else:
-                    return cp( ((1, 1), (arctan_function_name, cp(N.im.terms[0].rat / N.rl.terms[0].rat) )) )
-                        
+                    if((N.im.terms[0].rat > 0) and (N.rl.terms[0].rat > 0)):
+                        return cp( ((1, 1), (arctan_function_name, abs(N.im.terms[0].rat / N.rl.terms[0].rat))) )
+                    
+                    if((N.im.terms[0].rat < 0) and (N.rl.terms[0].rat > 0)):
+                        return cp( ((-1, 1), (arctan_function_name, abs(N.im.terms[0].rat / N.rl.terms[0].rat))) )
+                    
+                    if((N.im.terms[0].rat > 0) and (N.rl.terms[0].rat < 0)):
+                        return cp( ((1, 1), pi_constant_name) ) - cp( ((1, 1), (arctan_function_name, abs(N.im.terms[0].rat / N.rl.terms[0].rat))) )
+                    
+                    if((N.im.terms[0].rat < 0) and (N.rl.terms[0].rat < 0)):
+                        return cp( ((-1, 1), pi_constant_name) ) + cp( ((1, 1), (arctan_function_name, abs(N.im.terms[0].rat / N.rl.terms[0].rat))) )                    
+                    
         elif(self.name == sin_function_name):
             if(len(self.args[0].rl.terms) == 0):
                 return cp(0)
@@ -747,55 +838,195 @@ class Function:
                     return -Function( (sin_function_name, -self.args[0]) ).alternate_form()
                 
                 else:
-                    if(self.args[0] == cp(0)):
-                        return cp(0)
+                    a = self.args[0]
                     
-                    elif(self.args[0] == pi_constant ):
-                        return cp(0)            
-                    
-                    elif(self.args[0] == cp( ((1, 2), pi_constant_name)) ):
-                        return cp( (1, 1) )
-                    
-                    elif(self.args[0] == cp( ((1, 3), pi_constant_name)) ):
-                        return cp( ((1, 2), (sqrt_function_name, cp(3))) )  
-                    
-                    elif(self.args[0] == cp( ((2, 3), pi_constant_name)) ):
-                        return cp( ((1, 2), (sqrt_function_name, cp(3))) )              
-                    
-                    elif(self.args[0] == cp( ((1, 4), pi_constant_name)) ):
-                        return cp( ((1, 2), (sqrt_function_name, cp(2))) )
-                    
-                    elif(self.args[0] == cp( ((1, 6), pi_constant_name)) ):
-                        return cp( (1, 2) )       
+                    if( (len(a.rl.terms) == 1) and (len(a.im.terms) == 0) ):
+                        if(len(a.rl.terms[0].irt) == 1):
+                            rat = None
+                            
+                            if TauMode:
+                                if(a.rl.terms[0].irt[0].name == tau_constant_name):
+                                    rat = 2 * a.rl.terms[0].rat                                
+                            else:
+                                if(a.rl.terms[0].irt[0].name == pi_constant_name):
+                                    rat = a.rl.terms[0].rat
+                        
+                            if isinstance(rat, Rational):
+                                rat = rat % 2
+                                
+                                if(rat > Rational(1, 2)):
+                                    # sin( a ) = sin( pi - a )
+                                    return cp( ((1, 1), (sin_function_name, pi_constant * (Rational(1) - rat))) )
+                                
+                                
+                                if(rat == Rational(1, 2)):
+                                    return cp( (1, 1) )
+                                
+                                elif(rat == Rational(1, 3)):
+                                    return cp( ((1, 2), (sqrt_function_name, cp(3))) )
+                                
+                                elif(rat == Rational(1, 4)):
+                                    return cp( ((1, 2), (sqrt_function_name, cp(2))) )
+                                
+                                elif(rat == Rational(1, 6)):
+                                    return cp( (1, 2) )
+                                
+                                else:
+                                    if TauMode:
+                                        return cp( ((1, 1), (sin_function_name, cp(rat / 2) * tau_constant)) )
+                                    
+                                    else:
+                                        return cp( ((1, 1), (sin_function_name, cp(rat) * pi_constant)) )
         
         elif(self.name == cos_function_name):
-            return Function( (sin_function_name, half_pi - self.args[0]) )
+            if ReplaceTrig:
+                return Function( (sin_function_name, half_pi_constant - self.args[0]) )
+            
+            else:
+                if(len(self.args[0].rl.terms) == 0):
+                    return cp(1)
+                else:
+                    if(self.args[0].rl.terms[0].rat < Rational(0)):  # cos( -5/2 x ) = cos( 5/2 x )
+                        return Function( (cos_function_name, -self.args[0]) ).alternate_form()
+                    
+                    else:
+                        a = self.args[0]
+                        
+                        if( (len(a.rl.terms) == 1) and (len(a.im.terms) == 0) ):
+                            if(len(a.rl.terms[0].irt) == 1):
+                                rat = None
+                                
+                                if TauMode:
+                                    if(a.rl.terms[0].irt[0].name == tau_constant_name):
+                                        rat = 2 * a.rl.terms[0].rat                                
+                                else:
+                                    if(a.rl.terms[0].irt[0].name == pi_constant_name):
+                                        rat = a.rl.terms[0].rat
+                            
+                                if isinstance(rat, Rational):
+                                    rat = rat % 2
+                                    
+                                    if(rat > Rational(1, 2)):
+                                        # cos( a ) = -cos( pi - a )
+                                        return cp( ((-1, 1), (cos_function_name, pi_constant * (Rational(1) - rat))) )
+                                    
+                                    
+                                    if(rat == Rational(1, 2)):
+                                        return cp(0)
+                                    
+                                    elif(rat == Rational(1, 3)):
+                                        return cp( (1, 2) )
+                                    
+                                    elif(rat == Rational(1, 4)):
+                                        return cp( ((1, 2), (sqrt_function_name, cp(2))) )
+                                    
+                                    elif(rat == Rational(1, 6)):
+                                        return cp( ((1, 2), (sqrt_function_name, cp(3))) )
+                                    
+                                    else:
+                                        if TauMode:
+                                            return cp( ((1, 1), (cos_function_name, cp(rat / 2) * tau_constant)) )
+                                        
+                                        else:
+                                            return cp( ((1, 1), (cos_function_name, cp(rat) * pi_constant)) )                
         
         elif(self.name == tan_function_name):
             if(len(self.args[0].rl.terms) == 0):
                 return cp(0)
+            
             else:
-                if(self.args[0].rl.terms[0].rat < Rational(0)):
+                if(self.args[0].rl.terms[0].rat < Rational(0)):  # tan( -5/2 x ) = -tan( 5/2 x )
                     return -Function( (tan_function_name, -self.args[0]) ).alternate_form()
                 
-                else:            
-                    if(self.args[0] == cp(0)):
-                        return cp(0)
+                else:
+                    a = self.args[0]
                     
-                    elif(self.args[0] == pi_constant):
-                        return cp(0)            
+                    if( (len(a.rl.terms) == 1) and (len(a.im.terms) == 0) ):
+                        if(len(a.rl.terms[0].irt) == 1):
+                            rat = None
+                            
+                            if TauMode:
+                                if(a.rl.terms[0].irt[0].name == tau_constant_name):
+                                    rat = 2 * a.rl.terms[0].rat                                
+                            else:
+                                if(a.rl.terms[0].irt[0].name == pi_constant_name):
+                                    rat = a.rl.terms[0].rat
+                        
+                            if isinstance(rat, Rational):
+                                rat = rat % 2
+                                
+                                if(rat > Rational(1, 2)):
+                                    # tan( a ) = -tan( pi - a )
+                                    return cp( ((-1, 1), (tan_function_name, pi_constant * (Rational(1) - rat))) )
+                                
+                                if(rat == Rational(1, 2)):
+                                    raise RuntimeError('tan(pi/2) is undefined')
+                                
+                                elif(rat == Rational(1, 3)):
+                                    return cp( ((1, 1), (sqrt_function_name, cp(3))) )
+                                
+                                elif(rat == Rational(1, 4)):
+                                    return cp(1)
+                                
+                                elif(rat == Rational(1, 6)):
+                                    return cp( ((1, 3), (sqrt_function_name, cp(3))) )
+                                
+                                else:
+                                    if TauMode:
+                                        return cp( ((1, 1), (tan_function_name, cp(rat / 2) * tau_constant)) )
+                                    
+                                    else:
+                                        return cp( ((1, 1), (tan_function_name, cp(rat) * pi_constant)) )
+        elif(self.name == ctg_function_name):
+            if ReplaceTrig:          
+                # ctg( x ) = tan( pi/2 - x )
+                return cp( ((1, 1), (tan_function_name, half_pi_constant - self.args[0])) )
+            
+            else:
+                if(len(self.args[0].rl.terms) == 0):
+                    raise RuntimeError('ctg(0) is undefined')
+                
+                else:
+                    if(self.args[0].rl.terms[0].rat < Rational(0)):  # ctg( -5/2 x ) = -ctg( 5/2 x )
+                        return -Function( (ctg_function_name, -self.args[0]) ).alternate_form()
                     
-                    elif(self.args[0] == cp( ((1, 3), pi_constant_name)) ):
-                        return cp( ((1, 1), (sqrt_function_name, cp(3))) )  
-                    
-                    elif(self.args[0] == cp( ((2, 3), pi_constant_name)) ):
-                        return cp( ((-1, 1), (sqrt_function_name, cp(3))) )              
-                    
-                    elif(self.args[0] == cp( ((1, 4), pi_constant_name)) ):
-                        return cp(1)
-                    
-                    elif(self.args[0] == cp( ((1, 6), pi_constant_name)) ):
-                        return cp( ((1, 3), (sqrt_function_name, cp(3))) )
+                    else:
+                        a = self.args[0]
+                        
+                        if( (len(a.rl.terms) == 1) and (len(a.im.terms) == 0) ):
+                            if(len(a.rl.terms[0].irt) == 1):
+                                rat = None
+                                
+                                if TauMode:
+                                    if(a.rl.terms[0].irt[0].name == tau_constant_name):
+                                        rat = 2 * a.rl.terms[0].rat                                
+                                else:
+                                    if(a.rl.terms[0].irt[0].name == pi_constant_name):
+                                        rat = a.rl.terms[0].rat
+                            
+                                if isinstance(rat, Rational):
+                                    rat = rat % 2
+                                    
+                                    if(rat > Rational(1, 2)):
+                                        # ctg( a ) = -ctg( pi - a )
+                                        return cp( ((-1, 1), (ctg_function_name, pi_constant * (Rational(1) - rat))) )
+                                    
+                                    
+                                    if(rat == Rational(1, 3)):
+                                        return cp( ((1, 3), (sqrt_function_name, cp(3))) )
+                                    
+                                    elif(rat == Rational(1, 4)):
+                                        return cp(1)
+                                    
+                                    elif(rat == Rational(1, 6)):
+                                        return cp( ((1, 1), (sqrt_function_name, cp(3))) )
+                                    
+                                    else:
+                                        if TauMode:
+                                            return cp( ((1, 1), (ctg_function_name, cp(rat / 2) * tau_constant)) )
+                                        
+                                        else:
+                                            return cp( ((1, 1), (ctg_function_name, cp(rat) * pi_constant)) )                
                     
         elif(self.name == arcsin_function_name):
             f = self.args[0]
@@ -815,13 +1046,13 @@ class Function:
                     if(f == cp(((1, 2), (pow_function_name, cp(3), cp((1, 2)))))):
                         return cp( ((1, 3), pi_constant_name) )
                     if(f == cp(1)):
-                        return half_pi
+                        return half_pi_constant
                 
         elif(self.name == arccos_function_name):
             f = self.args[0]
             
             if(f.is_zero()):
-                return half_pi
+                return half_pi_constant
                         
             if((len(f.rl.terms) == 1) and (len(f.im.terms) == 0)):
                 if(f.rl.terms[0].rat < 0):
@@ -886,9 +1117,33 @@ class Function:
     
     def sign(self):
         always_positive = [pi_constant_name, e_constant_name, abs_function_name]
+        positive_for_real = [cosh_function_name, exp_function_name]
+        positive_for_positive = [sinh_function_name, arctan_function_name, arctan_function_name]
         
         if(self.name in always_positive):
             return 1
+        if(self.name in positive_for_real):
+            if(self.args[0].is_always_real()):
+                return 1
+        if(self.name in positive_for_positive):
+            if(cp( ((1, 1), (sign_function_name, self.args[0])) ).simplified() == cp(1)):
+                return 1
+        
+        
+        if(self.name == pow_function_name):
+            if(self.args[0].is_real_and_positive() and self.args[1].is_always_real()):
+                return 1
+        
+        if(self.name == ln_function_name):
+            if(self.args[0].is_real_rational()):
+                r = self.args[0].rl.terms[0].rat
+                
+                if(r == 1):
+                    return None
+                elif(r > 1):
+                    return 1
+                elif(r < 1):
+                    return -1
         
         return None
     
@@ -907,10 +1162,10 @@ class Function:
             if(self.args[0].is_always_real() and
                self.args[1].is_always_real()):
                 return True
-            
+        
         # if the argument of the following functions is real, the output is real too
-        lst = [exp_function_name, ln_function_name, sin_function_name, cos_function_name, tan_function_name, 'cotan', sinh_function_name, cosh_function_name, tanh_function_name, 'cotanh']
-        if(self.name in lst):
+        real_for_real = [exp_function_name, ln_function_name, sin_function_name, cos_function_name, tan_function_name, 'cotan', sinh_function_name, cosh_function_name, tanh_function_name, ctgh_function_name, arctan_function_name]
+        if(self.name in real_for_real):
             if self.args[0].is_always_real():
                 return True
         
@@ -1282,7 +1537,9 @@ class Irrational:
             if not term.is_real_and_positive():
                 return False
         
-        return True    
+        return True
+    def is_real_and_negative(self):
+        return (-self).is_real_and_positive()
     
     def is_rational(self):
         if(len(self.terms) == 0):
@@ -1486,7 +1743,13 @@ class Complex:
     
     def is_real_and_positive(self):
         return (self.rl.is_real_and_positive() and
-                self.im.is_zero())    
+                self.im.is_zero())
+    def is_real_and_negative(self):
+        return (self.rl.is_real_and_negative() and
+                self.im.is_zero())
+    
+    def is_even(self):
+        return (self.is_real_int() and (self.rl.terms[0].rat.num % 2 == 0))
     
     def is_real_rational(self):
         if not self.is_always_real():
@@ -1673,6 +1936,9 @@ def prime_factors(n):
         
         if(p > 0):
             factors.append( (i, p) )
+            
+    if(n < 0):
+        factors.append( (-1, 1) )
     
     return factors
     
@@ -1973,6 +2239,12 @@ def return_to_default():
     global AutoSimplify
     AutoSimplify = False
     
+    global ExpandComplexExponentials
+    ExpandComplexExponentials = True
+    
+    global ReplaceTrig
+    ReplaceTrig = True
+    
 def show_names():
     print('Names of constants and varibles:')
     print('    e_constant_name =         ' + e_constant_name)
@@ -2034,5 +2306,5 @@ def cp(*args):  # this little function is here to make your life easier
 
 
 pi_constant = cp(pi_constant_name)
-half_pi = cp( ((1, 2), pi_constant_name) )
+half_pi_constant = cp( ((1, 2), pi_constant_name) )
 e_constant = cp(e_constant_name)
