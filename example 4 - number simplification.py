@@ -52,6 +52,13 @@ print('tan  30 =', cp( ((1, 1), ('tan', cp( ((1, 6), 'pi') ))) ).simplified())
 print()
 # and tangents
 
+print('ctg 120 =', cp( ((1, 1), ('ctg', cp( ((2, 3), 'pi') ))) ).simplified())
+print('ctg  60 =', cp( ((1, 1), ('ctg', cp( ((1, 3), 'pi') ))) ).simplified())
+print('ctg  45 =', cp( ((1, 1), ('ctg', cp( ((1, 4), 'pi') ))) ).simplified())
+print('ctg  30 =', cp( ((1, 1), ('ctg', cp( ((1, 6), 'pi') ))) ).simplified())
+print()
+# and cotangents
+
 print('arcsin 0 =', cp( ((1, 1), ('arcsin', cp( ((0, 1)) ))) ).simplified())
 print('arcsin 1/2 =', cp( ((1, 1), ('arcsin', cp( ((1, 2)) ))) ).simplified())
 print('arcsin 1/sqrt(2) =', cp( ((1, 1), ('arcsin', cp( ((1, 2), ('sqrt', cp(2))) ))) ).simplified())
@@ -92,6 +99,20 @@ print(cp( ((1, 1), ('sin', cp( ((-1, 7), 'pi') ))) ).simplified())
 print()
 # minus signs in sin and tan are taken out
 
+print(cp( ((1, 1), ('cos', cp((1, 4))))).simplified())
+print(cp( ((1, 1), ('ctg', cp((1, 4))))).simplified())
+print()
+# cos and ctg are replaced with sin and tan
+# if you want to turn it off, switch ReplaceTrig to False
+# for more info, look up example 6
+
+print('sin(11/3 pi) =', cp( ((1, 1), ('sin', cp( ((11, 3), 'pi') ))) ).simplified())
+print('cos(11/3 pi) =', cp( ((1, 1), ('cos', cp( ((11, 3), 'pi') ))) ).simplified())
+print('tan(11/3 pi) =', cp( ((1, 1), ('tan', cp( ((11, 3), 'pi') ))) ).simplified())
+print('ctg(11/3 pi) =', cp( ((1, 1), ('ctg', cp( ((11, 3), 'pi') ))) ).simplified())
+print()
+# trig functions of type sin(2 * pi + f) are simplified to sin(f)
+
 D = cp( ((1, 1), ('pow', cp( ((1, 1), [
     ('sqrt', cp(3)),
     ('ln', cp(2))
@@ -112,6 +133,13 @@ print('(pi ** 1/2) ** 2 =', cp( ((1, 1), ('pow', cp( ((1, 1), ('pow', cp('pi'), 
 print('(a ** 1/2) ** 2 =',cp( ((1, 1), ('pow', cp( ((1, 1), ('pow', cp('a'), cp((1, 2)))) ), cp(2)) )).simplified())
 print()
 # pow( pow(a, b), c ) is simplified to pow(a, b * c) if a is always positive
+
+print('(-f) ** 12 =', cp( ((1, 1), ('pow', -cp('f'), cp(12))) ).simplified())
+print('(-f) ** 11 =', cp( ((1, 1), ('pow', -cp('f'), cp(11))) ).simplified())
+print('(if) ** 12 =', cp( ((1, 1), ('pow', cp(0, 'f'), cp(12))) ).simplified())
+print('(if) ** 11 =', cp( ((1, 1), ('pow', cp(0, 'f'), cp(11))) ).simplified())
+print()
+# that`s how minus signs and imaginary units are taken out of the power functions
 
 F = cp( ((1, 1), ('pow', D, E**2)) )
 print('F =', F)
@@ -154,7 +182,9 @@ print()
 L = cp( ((1, 1), ('sqrt', cp(2))) )
 print('L =', L)
 print(L.simplified())
-# sqrt is automatically changed to sqrt
+print()
+# sqrt(x) is automatically changed to pow(x, 1/2)
+# during displaying, though, it`s shown as sqrt
 
 M = cp( ((1, 1), ('log', cp(3), cp(10))) )
 print('M =', M)
@@ -184,10 +214,54 @@ print('sign( e ) =', cp( ((1, 1), ('sign', cp('e'))) ).simplified())
 print()
 # some functions are known to always be positive
 
-print('sign( e * pi * ln(4) ) =', cp( ((1, 1), ('sign', cp( ((1, 1), ['e', 'pi', ('ln', cp(4))]) ))) ).simplified())
+print('sign(exp(3)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('exp', cp(3))) ))) ).simplified())
+print('sign(cosh(-2)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('cosh', cp(-2))) ))) ).simplified())
+print()
+# some functions are known to be positive if their argument is real
+
+print('sign(ln(2)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('ln', cp(2))) ))) ).simplified())
+print('sign(sinh(3)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('sinh', cp(3))) ))) ).simplified())
+print('sign(arctan(2)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('arctan', cp(2))) ))) ).simplified())
+print()
+# some functins are known to be positive/negative for certain values of their arguments
+
+print('sign(pow(2, 13/4)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('pow', cp(2), cp((13, 4)))) ))) ).simplified())
+print('sign(pow(C, 13/4)) =', cp( ((1, 1), ('sign', cp( ((1, 1), ('pow', cp('C'), cp((13, 4)))) ))) ).simplified())
+print('sign(pow(2, D)) = ', cp( ((1, 1), ('sign', cp( ((1, 1), ('pow', cp(2), cp('D'))) ))) ).simplified())
+print()
+# power function is positive if the power is real and the base is real and positive
+# if there is no guarantee if both of these consitions hold, the sign remains unknown
+
+print('sign( -e * pi * ln(4) ) =', cp( ((1, 1), ('sign', cp( ((-1, 1), ['e', 'pi', ('ln', cp(4))]) ))) ).simplified())
 print()
 # if a sign function takes product of several real functions as an argument,
 # the result is a product of signs of the functions
+
+print('abs(-n) =', cp( ((1, 1), ('abs', -cp('n'))) ).simplified())
+print('abs(n i) =', cp( ((1, 1), ('abs', cp(0, 'n'))) ).simplified())
+print()
+# abs(-n) = abs(n)
+# abs(n i) = abs(n)
+
+print('abs(a * b * c) =', cp( ((1, 1), ('abs', cp( ((1, 1), ['a', 'b', 'c']) ))) ).simplified())
+print()
+# abs(a * b * c...) = abs(a) * abs(b) * abs(c)...
+
+print('abs(3) =', cp( ((1, 1), ('abs', cp(3))) ).simplified())
+print('abs(i) =', cp( ((1, 1), ('abs', cp(0, 1))) ).simplified())
+print()
+
+print('abs(-pi) =', cp( ((1, 1), ('abs', -cp('pi'))) ).simplified())
+print('abs(f) =', cp( ((1, 1), ('abs', cp('f'))) ).simplified())
+print()
+# abs(r) = +-r, where r is a real number
+# if there is no guarantee r is real, simplification is not done
+
+print('abs(e + 3 i) =', cp( ((1, 1), ('abs', cp('e', 3))) ).simplified())
+print('abs(2 + 9 i) =', cp( ((1, 1), ('abs', cp(2, 9))) ).simplified())
+print()
+# absolute values of type( a + b i ), where a and b are real numbers
+# are simplified as sqrt( a**2 + b**2 )
 
 print('Rl( 3 + 8 i) =', cp( ((1, 1), ('Rl', cp(3, 8) )) ).simplified())
 print('Im( 3 + 8 i) =', cp( ((1, 1), ('Im', cp(3, 8) )) ).simplified())
@@ -209,10 +283,27 @@ print('Rl(b i) =', cp( ((1, 1), ('Rl', cp(0, 'b')))).simplified())
 print('Im(b i) =', cp( ((1, 1), ('Im', cp(0, 'b')))).simplified())
 # Rl and Im are also simplified like that
 
+print('pow(3 + 7 i, 8) =', cp( ((1, 1), ('pow', cp(3, 7), cp(8))) ).simplified())
+print()
+# expressions of type pow( a + b i, n ), where a and b are rational and n is real,
+# are calculated
+
 print('exp(0) =', cp( ((1, 1), ('exp', cp(0))) ).simplified())
 print('exp(1) =', cp( ((1, 1), ('exp', cp(1))) ).simplified())
 print()
 # exp functions are calculated if the argument is either 0 or 1
+
+print('exp(39/11 i) =', cp( ((1, 1), ('exp', cp(0, (39, 11)))) ).simplified())
+print('exp(a i) =', cp( ((1, 1), ('exp', cp(0, 'a'))) ).simplified())
+print('exp(pi i) =', cp( ((1, 1), ('exp', cp(0, 'pi'))) ).simplified())
+print()
+# expressions of type exp(f i) are re-written as cos(f) + i sin(f),
+# if f is guaranteed to be a real number
+# you can turn this off using ExpandComplexExponents setting (view example 6)
+
+print('pow(exp(a), b) =', cp( ((1, 1), ('pow', cp( ((1, 1), ('exp', cp('a'))) ), cp('b'))) ).simplified())
+print()
+# pow(exp(a), b) = exp(a * b)
 
 print('ln(24) =', cp( ((1, 1), ('ln', cp(24))) ).simplified())
 # numbers inside logarithms are decomposed into primes
@@ -224,9 +315,14 @@ print()
 
 print('arg(2) =', cp( ((1, 1), ('arg', cp(2))) ).simplified())
 print('arg(3 i) =', cp( ((1, 1), ('arg', cp(0, 3))) ).simplified())
-print('arg(2 + 3  i) =', cp( ((1, 1), ('arg', cp(2, 3))) ).simplified())
+print('arg(-3 i) =', cp( ((1, 1), ('arg', cp(0, -3))) ).simplified())
+print('arg(2 + 3 i) =', cp( ((1, 1), ('arg', cp(2, 3))) ).simplified())
+print('arg(-2 + 3 i) =', cp( ((1, 1), ('arg', cp(-2, 3))) ).simplified())
+print('arg(2 + -3 i) =', cp( ((1, 1), ('arg', cp(2, -3))) ).simplified())
+print('arg(-2 + -3 i) =', cp( ((1, 1), ('arg', cp(-2, -3))) ).simplified())
 print()
-# args of rational numbers are calulated
+# arg(a + b i) is simplified to arctan(b/a) if a an b are real and rational and a != 0
+# if a = 0, arg(bi) = pi/2 * sign(b)
 
 print('arcsin(-2/3 f) =', cp( ((1, 1), ('arcsin', cp(((-2, 3), 'f')))) ).simplified())
 print('arccos(-2/3 f) =', cp( ((1, 1), ('arccos', cp(((-2, 3), 'f')))) ).simplified())
