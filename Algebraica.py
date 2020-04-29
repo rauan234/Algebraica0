@@ -129,7 +129,7 @@ PrimeNumberSearchStep = 10000
 # PrimeNumberSearchStep determines by how much it will be expanded.
 
 global HighestAllowedPrime
-HighestAllowedPrime = 100000
+HighestAllowedPrime = 10000
 # decomposing large numbers into primes can be a very hard task.
 # that`s why there is a limit to how far Algebraica will go.
 # namely, it won`t search for primes that are higher than HighestAllowedPrime.
@@ -1681,6 +1681,12 @@ class Function:
                     # abs(-N) = abs(N)
                     return cp( (1, (abs_function_name, -N)) )
                 
+                if(len(term.irt) == 1):
+                    if(term.irt[0].name == sign_function_name):
+                        # abs(3/7 * sign(x)) = 3/7 * abs(sign(x)) = 3/7
+                        
+                        return cp(term.rat)
+                
                 if( ((len(term.irt) > 0) and (term.rat != 1)) or (len(term.irt) > 1) ):
                     out = abs(term.rat)
                     
@@ -2647,7 +2653,7 @@ class Function:
     
     def partial(self, i):
         if( (self.name == pow_function_name) and (i == 0) ):
-            return self.args[1] * cp( (1, (pow_function_name, self.args[0], self.args[1] - cp(1))) )
+            return self.args[1] * cp( (1, (pow_function_name, self.args[0], self.args[1] - 1)) )
         
         elif( (self.name == pow_function_name) and (i == 1) ):
             return cp( (1, (ln_function_name, self.args[0])) ) * cp(self)
@@ -2754,13 +2760,13 @@ class Function:
         
         elif( (self.name == arcsinh_function_name) and (i == 0) ):
             # d/dx[arcsin x] = 1 / sqrt(1 + x**2)
-            return cp( (1, (pow_function_name, cp( (1, (pow_function_name, self.args[0], cp(2))) ) + cp(1), cp((-1, 2)))) )
+            return cp( (1, (pow_function_name, cp( (1, (pow_function_name, self.args[0], cp(2))) ) + 1, cp((-1, 2)))) )
         
         elif( (self.name == arccosh_function_name) and (i == 0) ):
             # d/dx[arccos x] = 1 / (sqrt(x - 1) * sqrt(x + 1) )
             return cp( (1, [
-                (pow_function_name, self.args[0] - cp(1), cp( ((-1, 2)) )),
-                (pow_function_name, self.args[0] + cp(1), cp( ((-1, 2)) ))
+                (pow_function_name, self.args[0] - 1, cp( ((-1, 2)) )),
+                (pow_function_name, self.args[0] + 1, cp( ((-1, 2)) ))
             ]) )
         
         elif( (self.name == arcsech_function_name) and (i == 0) ):
@@ -2770,8 +2776,8 @@ class Function:
             
             return cp( (-1, [
                 (pow_function_name, self.args[0], cp(-2)),
-                (pow_function_name, one_over_x - cp(1), cp((-1, 2))),
-                (pow_function_name, one_over_x + cp(1), cp((-1, 2)))
+                (pow_function_name, one_over_x - 1, cp((-1, 2))),
+                (pow_function_name, one_over_x + 1, cp((-1, 2)))
                              ]) )
         
         elif( (self.name == arccsch_function_name) and (i == 0) ):
