@@ -1,4 +1,4 @@
-from Algebraica import cp, make_irrational
+from Algebraica import cp, make_irrational, function
 from Algebraica import Rational, Function, Term, Irrational, Complex
 import Algebraica
 
@@ -27,7 +27,7 @@ except Exception as exc:
     print(exc)
     
 try:
-    Function( ('sqrt', 3) )
+    function('sqrt', 3)
 except Exception as exc:
     print(exc)
 
@@ -37,7 +37,7 @@ except Exception as exc:
     print(exc)
     
 try:
-    Function( ('') )
+    function('')
 except Exception as exc:
     print(exc)
     
@@ -87,12 +87,12 @@ except Exception as exc:
     print(exc)
 
 try:
-    make_irrational( ((1, 1), ('sqrt', 2)) )
+    make_irrational( (1, ('sqrt', 2)) )
 except Exception as exc:
     print(exc)
 
 try:
-    make_irrational( ((1, 1), (2, cp(2))) )
+    make_irrational( (1, (2, cp(2))) )
 except Exception as exc:
     print(exc)
     
@@ -170,7 +170,7 @@ except Exception as exc:
 
 
 try:
-    Function( ('pi') ) == 3.14
+    function('pi') == 3.14
 except Exception as exc:
     print(exc)
     
@@ -180,8 +180,8 @@ except Exception as exc:
 T = Term(
     Rational(4, 11),
     [
-        Function( ('sqrt', cp(2)) ),
-        Function( ('ln', cp(5)) )
+        function('sqrt', cp(2)),
+        function('ln', cp(5))
     ]
 )
 
@@ -273,23 +273,106 @@ except Exception as exc:
 
 
 try:
-    Function( ('pi', cp(2)) )
+    Algebraica.Numerical(0, 0).arg()
+except Exception as exc:
+    print(exc)
+
+
+try:
+    cp( (1, ('tan', cp('pi') / 2)) )
 except Exception as exc:
     print(exc)
     
 try:
-    Function( ('cosh', cp(6), cp(4)) )
+    cp( (1, ('sec', cp('pi') / 2)) )
 except Exception as exc:
     print(exc)
     
 try:
-    Function( ('pow') )
+    cp( (1, ('ln', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('arg', cp(0))) )
+except Exception as exc:
+    print(exc)
+
+try:
+    cp( (1, ('cot', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('csc', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('csch', cp(0))) )
+except Exception as exc:
+    print(exc)    
+    
+try:
+    cp( (1, ('coth', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('arcsec', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('arccsc', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('arcsech', cp(0))) )
+except Exception as exc:
+    print(exc)
+        
+try:
+    cp( (1, ('arccsch', cp(0))) )
+except Exception as exc:
+    print(exc)
+    
+try:
+    cp( (1, ('arctanh', cp(1))) )
+except Exception as exc:
+    print(exc)
+# tan(pi/2), cot(0), coth(0), and arcsec(0) are undefined
+# Algebraica only notices this when simplifying the function
+
+
+try:
+    function('\0\r\n ()[]{}<>.,^*-=+/\'\"')
+except Exception as exc:
+    print(exc)
+# there are certain characters that are not allowed to be in a function name
+
+
+try:
+    function('pi', cp(2))
+except Exception as exc:
+    print(exc)
+    
+try:
+    function('cosh', cp(6), cp(4))
+except Exception as exc:
+    print(exc)
+    
+try:
+    function('pow')
 except Exception as exc:
     print(exc)
     
 # if you create a function and its` name and the number of arguments are inconsistent,
 # an exception is thrown
 
-# if you want to use pi as a function of one variable, you can change settings
-# so that pi won`t be recognized as 3.1415... any longer
-# look up example 6 to learn more
+# if you want to use pi as a function of one variable, you can change settings,
+# so that pi won`t be recognized as 3.1415... any longer.
+# look up example 6 to learn more.
+
+input()
