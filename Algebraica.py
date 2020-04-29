@@ -1218,7 +1218,8 @@ class Function:
             rl_function_name: 'Re',
             im_function_name: 'Im',
             arg_function_name: 'Arg',
-            abs_function_name: 'Abs'
+            abs_function_name: 'Abs',
+            sign_function_name: 'Sign'
         }
         
         out = ''
