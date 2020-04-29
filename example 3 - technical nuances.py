@@ -1,51 +1,14 @@
 from Algebraica import cp, make_irrational
 from Algebraica import Rational, Function, Term, Irrational, Complex
+# in this example, I will tell some details that didn`t quite fit to
+# the last two examples but needed to be told.
 
 
-# cp(*args) function relies completely on make_irrational(inp)
-'''
-def cp(*args):
-    if(len(args) == 1):
-        rl = args[0]
-        
-        return Complex(
-            make_irrational(rl),
-            make_irrational(0)
-        )
-        
-    elif(len(args) == 2):
-        rl = args[0]
-        im = args[1]
-        
-        c = Complex(
-            make_irrational(rl),
-            make_irrational(im)
-        )
-        
-    else:
-        raise RuntimeError
-    
-    return c
-'''
-# as you can see, it creates a Complex by simply converting its` inputs
-# into Irrational and then calling Complex.__init__
-
-
-# make_irrational(inp) is a great pile of if-statements
-# it was precariously designed to be able to sort out
-# any trash you might want to throw in it, as long as it makes
-# just a little bit of sense
-# it takes care of 13 input formats occupies 100 lines of code
-# the function itself is intimidatingly messy, so I decided not to
-# include it in this example
-# if you want, you can find the function in Algebraica.py
-
-
-A = make_irrational( [ 1, (3, 7), ((1, 2), 'pi'), 0, ((9, 11), 'pi') ] )
+A = cp( [ 1, (3, 7), ((1, 2), 'pi'), 0, ((9, 11), 'pi') ] )
 print('A =', A)
 print()
-# note the auto-simplification function that removes the zero-terms from Irrationals
-# also, terms are automatically grouped together, so that 1/2 pi + 9/11 pi becomes 29/22 pi
+# notice the auto-simplification function that removes the zero-terms.
+# also, note that terms are automatically grouped together, so that 1/2 pi + 9/11 pi becomes 29/22 pi.
 
 
 B = Term(
@@ -59,8 +22,10 @@ B = Term(
 )
 print('B =', B)
 print()
-# the functions that are multiplied together to form a term are
-# sorted in alphabet order
+# in order for comparison operation to work, e.g. to make
+# pi * sqrt(2) equal to sqrt(2) * pi,
+# functions inside Terms are sorted in alphabet order
+
 
 C = make_irrational([
     ( (1, 2), [
@@ -81,7 +46,8 @@ C = make_irrational([
     ])
 print('C =', C)
 print()
-# likewise, terms are sorted in alphabet order
+# Terms inside Irrationals are sorted in alphabet order, too
+
 
 D = Term(
     Rational(1, 1),
@@ -96,6 +62,7 @@ D = Term(
 print('D =', D)
 print()
 # identical functions are stacked together
+
 
 E = make_irrational([
     ( (1, 2), [
@@ -118,19 +85,27 @@ print('E =', E)
 print()
 # similarly, terms with equal irrational parts are added together
 
+
 F = Irrational()
 print('F =', F)
 print()
 # if an Irrational has no terms, it is shown as 0
 
-G = cp(0, 'f')
-print('G =', G)
-print('~G =', ~G)
-print('arg(G) =', G.arg())
-print('arg(~G) =', (~G).arg())
+
+print('log3(7) =', cp( (1, ('log', cp(7), cp(3))) ).simplified())
 print()
-# if the real part of the input of the arg function is zero,
-# the result is pi/2 * sign( im )
+# log3(7) should be written as cp( (1, ('log', cp(7), cp(3))) ),
+#                       not as cp( (1, ('log', cp(3), cp(7))) )
+
+
+print('x ** 6 =', cp( (1, ('pow', cp('x'), cp(6))) ))
+print('x ** -6 =', cp( (1, ('pow', cp('x'), cp(-6))) ))
+print('x ** 1/2 =', cp( (1, ('pow', cp('x'), cp((1, 2)))) ))
+print('x ** -1/2 =', cp( (1, ('pow', cp('x'), cp((-1, 2)))) ))
+print('x ** -1 =', cp( (1, ('pow', cp('x'), cp(-1))) ))
+print()
+# power functions pow(base, pow) with pow being equal to -1, -1/2, 1/2 or being an
+# integer are shown in a special way.
 
 
 input()
