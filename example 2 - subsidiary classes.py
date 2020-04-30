@@ -230,6 +230,13 @@ print()
 # way they are utilized.
 # in other words, we simply don`t need anything except multiplication.
 
+print(A * function('e'))
+print(A / function('e'))
+print(A * function('pi'))
+print(A / function('pi'))
+print()
+# Terms can be multiplied and divided by Functions
+
 del A
 del B
 
