@@ -478,6 +478,14 @@ print()
 # -(a + b i) = -a - b i
 # ~(a + b i) = a - b i
 
+
+print(A.wolfram_lang())
+print(A.compileable())
+print()
+# class Numerical objects can be printed in a form suitble for Wolfram Mathematica,
+# or in a form Python 3 can understand
+
+
 # Algebraica also includes functions that take Numerical as an argument
 # and return another Numerical
 print('(6 + 7.2 i) ** (2 + 3 i) =', Algebraica.cpower(Numerical(6, 7.2), Numerical(2, 3)))
