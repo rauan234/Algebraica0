@@ -497,6 +497,19 @@ class Numerical:
         
         return out
     
+    def wolfram_lang(self):
+        if(self.im > 0):
+            return '(' + str(self.rl) + ' + ' + str(self.im) + ' I)'
+        
+        elif(self.im < 0):
+            return '(' + str(self.rl) + ' - ' + str(-self.im) + ' I )'
+        
+        else:
+            return str(self.rl)
+        
+    def compileable(self):
+        return 'Numerical(' + str(self.rl) + ', ' + str(self.im) + ')'
+    
     def __eq__(first, second):
         if isinstance(second, Numerical):
             return ((abs(first.rl - second.rl) < NumericalComparisonMargin) and
@@ -754,7 +767,7 @@ class Function:
             tan_function_name
         )
         if(self.name in not_defined_for_half_pi):
-            if(self.args[0] == half_pi_constant):
+            if(self.args[0] == cp((1, 2), pi_constant_name)):
                 raise ValueError(self.name + '(pi/2) is not defined')
         
         not_defined_for_one = (
@@ -1506,7 +1519,7 @@ class Function:
             else:
                 return cp( 0, ((1, 2), pi_constant_name) )                
             
-        elif(N == e_constant):
+        elif(N == cp(e_constant_name)):
             return cp(1)
             
         if((len(N.rl.terms) == 1) and (len(N.im.terms) == 0)):  # if N is single-term
@@ -1804,7 +1817,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # sin( a ) = sin( pi - a )
-                            return cp( (1, (sin_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (1, (sin_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         
                         if(rat == Rational(1, 2)):
@@ -1821,10 +1834,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (sin_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (sin_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (sin_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (sin_function_name, cp(rat) * cp(pi_constant_name))) )
         
         return cp(self)
     
@@ -1854,7 +1867,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # cos( a ) = -cos( pi - a )
-                            return cp( (-1, (cos_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (-1, (cos_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         
                         if(rat == Rational(1, 2)):
@@ -1871,10 +1884,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (cos_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (cos_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (cos_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (cos_function_name, cp(rat) * cp(pi_constant_name))) )
                             
         return cp(self)
     
@@ -1907,7 +1920,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # 1 / cos( a ) = -1 / cos( pi - a )
-                            return cp( (-1, (sec_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (-1, (sec_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         
                         if(rat == Rational(1, 2)):
@@ -1924,10 +1937,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (sec_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (sec_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (sec_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (sec_function_name, cp(rat) * cp(pi_constant_name))) )
     
         return cp(self)
                                 
@@ -1958,7 +1971,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # 1 / sin( a ) = 1 / sin( pi - a )
-                            return cp( (1, (csc_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (1, (csc_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         
                         if(rat == Rational(1, 2)):
@@ -1975,10 +1988,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (csc_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (csc_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (csc_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (csc_function_name, cp(rat) * cp(pi_constant_name))) )
         
         return cp(self)    
     
@@ -2009,7 +2022,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # tan( a ) = -tan( pi - a )
-                            return cp( (-1, (tan_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (-1, (tan_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         if(rat == Rational(1, 2)):
                             raise ValueError('tan(pi/2) is undefined')
@@ -2025,10 +2038,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (tan_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (tan_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (tan_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (tan_function_name, cp(rat) * cp(pi_constant_name))) )
         
         return cp(self)
     
@@ -2059,7 +2072,7 @@ class Function:
                         
                         if(rat > Rational(1, 2)):
                             # cot( a ) = -cot( pi - a )
-                            return cp( (-1, (cot_function_name, pi_constant * (Rational(1) - rat))) )
+                            return cp( (-1, (cot_function_name, cp(pi_constant_name) * (Rational(1) - rat))) )
                         
                         if(rat == Rational(1, 2)):
                             return cp(0)
@@ -2075,10 +2088,10 @@ class Function:
                         
                         else:
                             if TauMode:
-                                return cp( (1, (cot_function_name, cp(rat / 2) * tau_constant)) )
+                                return cp( (1, (cot_function_name, cp(rat / 2) * cp(tau_constant_name))) )
                             
                             else:
-                                return cp( (1, (cot_function_name, cp(rat) * pi_constant)) )
+                                return cp( (1, (cot_function_name, cp(rat) * cp(pi_constant_name))) )
         
         return cp(self)
     
@@ -2133,7 +2146,7 @@ class Function:
                     
         if((len(f.rl.terms) == 1) and (len(f.im.terms) == 0)):
             if(f.rl.terms[0].rat < 0):
-                return pi_constant - cp( (1, (arccos_function_name, -f)) )       
+                return cp(pi_constant_name) - cp( (1, (arccos_function_name, -f)) )       
             
             else:
                 if TauMode:
@@ -2173,7 +2186,7 @@ class Function:
         if((len(f.rl.terms) == 1) and (len(f.im.terms) == 0)):
             if(f.rl.terms[0].rat < 0):
                 # arcsec(-f) = arccos(-1/f) = pi - arccos(1/f) = pi - arcsec(f)
-                return pi_constant - cp( (1, (arcsec_function_name, -f)) )       
+                return cp(pi_constant_name) - cp( (1, (arcsec_function_name, -f)) )       
             
             else:
                 if TauMode:
@@ -5654,10 +5667,3 @@ def cp(*args):  # this little function is here to make your life easier
         raise ValueError('Expected 1 or 2 arguments, got ' + str(len(args)))
     
     return c
-
-
-
-pi_constant = cp(pi_constant_name)
-tau_constant = cp(tau_constant_name)
-half_pi_constant = cp( ((1, 2), pi_constant_name) )
-e_constant = cp(e_constant_name)
